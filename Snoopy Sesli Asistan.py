@@ -9,11 +9,40 @@ import wikipediaapi
 import python_weather
 import asyncio
 import random
+import http.client
+import json
 
 r = sr.Recognizer()  
 
 fikralar = ["Delinin biri yataktan düşmüş sonra kalkmış yerine yatmış.10 dakika sonra tekrar düşmüş.Bunun üzerine deli iyi ki az önce kalkmışım yoksa kendi üstüme düşecektim demiş","Adamın biri atletmiş, karısı da don","Ayakkabıcı adama, sıkıyorsa almayın demiş. Adam korkup almamış","İzinsiz satulan meşrubata ne denir, gayrimeşrubat"]
 secilen_fikralar = random.choice(fikralar)
+
+def get_news():
+    haber_sayısı = record()
+    if haber_sayısı == 'bir':
+        haber_sayısı = 1
+    haber_sayısı = int(haber_sayısı)
+    conn = http.client.HTTPSConnection("api.collectapi.com")
+    headers = {
+        'content-type': "application/json",
+        'authorization': "apikey 3RS5Y0RsBdFBsLr5wKczbM:3RwslYtpe7w753VxqESSsf"
+        }
+    conn.request("GET", "/news/getNews?country=tr&tag=general", headers=headers)
+    res = conn.getresponse()
+    data = res.read()
+    dataa = data.decode("utf-8")
+    parsed_data = json.loads(dataa)
+    news_sources = [result['source'] for result in parsed_data['result']]
+    descriptions = [result['description'] for result in parsed_data['result']]
+    sentence_count = len(descriptions)
+    if haber_sayısı <= sentence_count:
+        for i in range(haber_sayısı):
+            news_source = news_sources[i]
+            sentence = descriptions[i]
+            speak(f"{news_source} kaynağına göre: {sentence}")
+    else:
+        speak("Lütfen 8 veya daha küçük bir sayı söyleyin.")
+        return get_news()
 
 async def getweather(w_city):
     async with python_weather.Client(format=python_weather.METRIC) as client:
@@ -250,6 +279,10 @@ def response(voice):
             if os.name == "nt":
                 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
             asyncio.run(getweather(w_city))
+    if "haberleri oku" in voice or "haber oku" in voice:
+        speak("sana 8 farklı haber okuyabilirim, kaç tane haber okumamı istersin")
+        get_news()
+
 
         
 
