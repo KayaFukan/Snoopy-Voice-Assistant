@@ -19,6 +19,9 @@ secilen_fikralar = random.choice(fikralar)
 
 def get_news():
     haber_sayısı = record()
+    if "tane" in haber_sayısı:
+        haber_sayısı = haber_sayısı.split()
+        haber_sayısı = haber_sayısı[0]
     if haber_sayısı == 'bir':
         haber_sayısı = 1
     haber_sayısı = int(haber_sayısı)
