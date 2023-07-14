@@ -97,11 +97,11 @@ def wikipedia_summary(query):
     else:
         return None
 
-def record(ask = False):
+def record(ask = False, timeout = 10):
     with sr.Microphone() as source:
         if ask:
             print(ask)
-        audio = r.listen(source)
+        audio = r.listen(source, timeout=timeout)
         voice = ""
         try:
             voice = r.recognize_google(audio, language="tr-TR")
